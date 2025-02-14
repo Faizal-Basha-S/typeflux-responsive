@@ -56,33 +56,59 @@ const TypingTest = ({ isActive, setIsActive, onComplete }) => {
     }
   };
 
+  const progress = (currentInput.length / sampleText.length) * 100;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-        <p className="text-lg leading-relaxed mb-4 select-none">
+      <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
+        {/* Progress bar */}
+        <motion.div 
+          className="absolute top-0 left-0 h-1 bg-purple-500"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.1 }}
+        />
+        
+        <p className="text-lg leading-relaxed mb-6 select-none font-mono">
           {sampleText.split('').map((char, index) => {
-            let className = 'transition-colors duration-150';
+            let className = 'px-[1px] transition-all duration-150 relative';
+            
             if (index < currentInput.length) {
-              className += currentInput[index] === char
+              const isCorrect = currentInput[index] === char;
+              className += isCorrect
                 ? ' text-green-500'
                 : ' text-red-500';
+              
+              if (index === currentInput.length - 1) {
+                className += ' after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-purple-500 after:animate-pulse';
+              }
+            } else if (index === currentInput.length) {
+              className += ' bg-purple-100 rounded';
             }
+            
             return (
-              <span key={index} className={className}>
+              <motion.span
+                key={index}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: index * 0.01 }}
+                className={className}
+              >
                 {char}
-              </span>
+              </motion.span>
             );
           })}
         </p>
+        
         <textarea
           ref={inputRef}
           value={currentInput}
           onChange={handleInput}
-          className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-shadow duration-200"
+          className="w-full p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all duration-200 hover:border-purple-200"
           placeholder="Start typing here..."
           rows={3}
         />
@@ -90,26 +116,58 @@ const TypingTest = ({ isActive, setIsActive, onComplete }) => {
 
       {isActive && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="grid grid-cols-3 gap-4 text-center"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4"
         >
-          <div className="p-4 bg-white rounded-lg shadow-sm">
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+          >
             <p className="text-sm text-gray-500 mb-1">WPM</p>
-            <p className="text-2xl font-bold text-purple-600">
+            <motion.p 
+              className="text-3xl font-bold text-purple-600"
+              key={calculateStats().wpm}
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            >
               {Math.round(calculateStats().wpm)}
-            </p>
-          </div>
-          <div className="p-4 bg-white rounded-lg shadow-sm">
+            </motion.p>
+          </motion.div>
+          
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+          >
             <p className="text-sm text-gray-500 mb-1">Accuracy</p>
-            <p className="text-2xl font-bold text-purple-600">
+            <motion.p 
+              className="text-3xl font-bold text-purple-600"
+              key={calculateStats().accuracy}
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            >
               {calculateStats().accuracy}%
-            </p>
-          </div>
-          <div className="p-4 bg-white rounded-lg shadow-sm">
+            </motion.p>
+          </motion.div>
+          
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className="p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+          >
             <p className="text-sm text-gray-500 mb-1">Mistakes</p>
-            <p className="text-2xl font-bold text-purple-600">{mistakes}</p>
-          </div>
+            <motion.p 
+              className="text-3xl font-bold text-purple-600"
+              key={mistakes}
+              initial={{ scale: 0.5 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+            >
+              {mistakes}
+            </motion.p>
+          </motion.div>
         </motion.div>
       )}
     </motion.div>
